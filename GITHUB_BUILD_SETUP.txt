@@ -1,0 +1,16 @@
+BERNIE WAVE EDITOR — GITHUB WINDOWS BUILD
+Version 2.0 · Build 014
+
+The repository now contains an automatic GitHub Actions workflow.
+
+TO BUILD THE WINDOWS INSTALLER
+1. Open this repository on GitHub.
+2. Click Actions.
+3. Click "Build Bernie Wave Editor for Windows".
+4. Click "Run workflow" and confirm Run workflow.
+5. Wait for the build-windows job to finish with a green check.
+6. Open the completed workflow run.
+7. Under Artifacts, download "Bernie-Wave-Editor-Windows".
+8. Open the downloaded ZIP. It contains "Bernie Wave Editor Setup.exe".
+
+The workflow builds from bernie-wave-editor-desktop.zip so the packaged app remains the source for the Windows installer.
