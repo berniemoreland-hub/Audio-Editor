@@ -1,6 +1,6 @@
 {
   "name": "bernie-wave-editor",
-  "version": "2.0.21",
+  "version": "2.0.22",
   "description": "Single-track VoxPro-style desktop waveform recorder and audio editor",
   "main": "main.js",
   "author": "Bernie Mack Productions",
@@ -47,5 +47,5 @@
       "artifactName": "Bernie.Wave.Editor.Setup.${ext}"
     }
   },
-  "buildNumber": "021"
+  "buildNumber": "022"
 }
