@@ -1,6 +1,6 @@
 {
   "name": "vox-bernie",
-  "version": "2.0.27",
+  "version": "2.0.28",
   "description": "Single-track VoxPro-style desktop waveform recorder and audio editor",
   "main": "main.js",
   "author": "Bernie Mack Productions",
@@ -29,19 +29,12 @@
       "stereo-monitor.js",
       "settings-ui-fix.js",
       "update-ui-fix.js",
+      "waveform-resize.js",
       "index.html",
       "package.json"
     ],
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "berniemoreland-hub",
-        "repo": "Audio-Editor"
-      }
-    ],
-    "win": {
-      "target": ["nsis"]
-    },
+    "publish": [{"provider":"github","owner":"berniemoreland-hub","repo":"Audio-Editor"}],
+    "win": {"target":["nsis"]},
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
@@ -51,5 +44,5 @@
       "artifactName": "VOX-BERNIE.Setup.${ext}"
     }
   },
-  "buildNumber": "027"
+  "buildNumber": "028"
 }
