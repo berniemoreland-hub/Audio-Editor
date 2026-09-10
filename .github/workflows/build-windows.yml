@@ -1,0 +1,48 @@
+name: Build Bernie Wave Editor for Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'bernie-wave-editor-desktop.zip'
+      - '.github/workflows/build-windows.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Extract current Bernie Wave Editor package
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path buildsrc | Out-Null
+          Expand-Archive -Path 'bernie-wave-editor-desktop.zip' -DestinationPath buildsrc -Force
+
+      - name: Install dependencies
+        working-directory: buildsrc/bernie-wave-editor-desktop
+        run: npm install
+
+      - name: Build Windows installer
+        working-directory: buildsrc/bernie-wave-editor-desktop
+        run: npm run dist
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bernie-Wave-Editor-Windows
+          path: buildsrc/bernie-wave-editor-desktop/dist/Bernie Wave Editor Setup.exe
+          if-no-files-found: error
+          retention-days: 30
