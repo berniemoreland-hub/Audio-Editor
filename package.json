@@ -1,6 +1,6 @@
 {
   "name": "vox-bernie",
-  "version": "2.0.25",
+  "version": "2.0.26",
   "description": "Single-track VoxPro-style desktop waveform recorder and audio editor",
   "main": "main.js",
   "author": "Bernie Mack Productions",
@@ -27,7 +27,6 @@
       "preload-entry.js",
       "preload.js",
       "stereo-monitor.js",
-      "save-menu-fix.js",
       "settings-ui-fix.js",
       "index.html",
       "package.json"
@@ -51,5 +50,5 @@
       "artifactName": "VOX-BERNIE.Setup.${ext}"
     }
   },
-  "buildNumber": "025"
+  "buildNumber": "026"
 }
