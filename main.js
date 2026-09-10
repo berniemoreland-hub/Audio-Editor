@@ -1,8 +1,11 @@
-const { app, BrowserWindow, session, Menu } = require('electron');
+const { app, BrowserWindow, session, Menu, dialog } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 
+let mainWindow = null;
+
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
     minWidth: 900,
@@ -17,8 +20,30 @@ function createWindow() {
       sandbox: true
     }
   });
+  mainWindow.loadFile('index.html');
+}
 
-  win.loadFile('index.html');
+function setupAutoUpdater() {
+  if (!app.isPackaged) return;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on('update-available', info => {
+    if (mainWindow) mainWindow.setTitle(`Bernie Wave Editor — Updating to ${info.version}…`);
+  });
+  autoUpdater.on('update-downloaded', async info => {
+    const result = await dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      buttons: ['Restart & Install', 'Later'],
+      defaultId: 0,
+      cancelId: 1,
+      title: 'Bernie Wave Editor Update Ready',
+      message: `Bernie Wave Editor ${info.version} is ready to install.`,
+      detail: 'Restart Bernie Wave Editor now to install the new version.'
+    });
+    if (result.response === 0) autoUpdater.quitAndInstall(false, true);
+  });
+  autoUpdater.on('error', error => console.error('Auto-update error:', error));
+  setTimeout(() => autoUpdater.checkForUpdates().catch(console.error), 5000);
 }
 
 app.whenReady().then(() => {
@@ -26,10 +51,9 @@ app.whenReady().then(() => {
   session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
     callback(permission === 'media');
   });
-  session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
-    return permission === 'media';
-  });
+  session.defaultSession.setPermissionCheckHandler((webContents, permission) => permission === 'media');
   createWindow();
+  setupAutoUpdater();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
