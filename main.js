@@ -13,7 +13,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 650,
     backgroundColor: '#090b0a',
-    title: 'Bernie Wave Editor',
+    title: 'VOX-BERNIE',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -59,9 +59,9 @@ function setupAutoUpdater() {
       buttons: ['Restart & Install', 'Later'],
       defaultId: 0,
       cancelId: 1,
-      title: 'Bernie Wave Editor Update Ready',
-      message: `Bernie Wave Editor ${info.version} is ready to install.`,
-      detail: 'Restart Bernie Wave Editor now to install the new version.'
+      title: 'VOX-BERNIE Update Ready',
+      message: `VOX-BERNIE ${info.version} is ready to install.`,
+      detail: 'Restart VOX-BERNIE now to install the new version.'
     });
     if (result.response === 0) autoUpdater.quitAndInstall(false, true);
   });
