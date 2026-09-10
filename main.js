@@ -5,6 +5,7 @@ const path = require('path');
 let mainWindow = null;
 
 function createWindow() {
+  const appVersion = app.getVersion();
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -17,7 +18,8 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true
+      sandbox: true,
+      additionalArguments: [`--bernie-app-version=${appVersion}`]
     }
   });
   mainWindow.loadFile('index.html');
