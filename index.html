@@ -1,0 +1,345 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bernie Wave Editor</title>
+<style>
+:root{--bg:#070908;--panel:#111512;--panel2:#0d110e;--line:#2a332d;--text:#edf5ef;--muted:#93a097;--green:#49df86;--red:#eb4a55;--amber:#e1b84c}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% -10%,rgba(73,223,134,.10),transparent 28%),linear-gradient(180deg,#070908,#0a0d0b 45%,#070908);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}body{padding:16px}button,input,select{font:inherit}.app{max-width:1500px;margin:auto}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:12px}.brand{display:flex;gap:12px;align-items:center}.logo{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--green),#148948);display:grid;place-items:center;color:#06130b;font-weight:950}.title h1{margin:0;font-size:21px}.title p{margin:2px 0 0;color:var(--muted);font-size:12px}.build{font-size:11px;letter-spacing:.08em;color:var(--muted);border:1px solid var(--line);padding:7px 10px;border-radius:999px;background:#0f1310}.workspace{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:rgba(17,21,18,.96);box-shadow:0 22px 60px rgba(0,0,0,.34)}.toolbar{display:flex;flex-wrap:wrap;gap:7px;padding:10px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#151a16,#111512)}button,.fileLabel{min-height:40px;border:1px solid #313a33;background:#1a211c;color:#eef5f0;border-radius:9px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;font-weight:800;font-size:12px}.fileLabel{position:relative;overflow:hidden}.fileLabel input{position:absolute;inset:0;opacity:0;cursor:pointer}.primary{background:linear-gradient(180deg,#72f2a5,#49d983);color:#06130b;border-color:#68ea9d}.record{background:linear-gradient(180deg,#ff6872,#d93c47);color:white;border-color:#ff737c;min-width:108px}.record.active{animation:pulse 1.1s infinite}@keyframes pulse{50%{box-shadow:0 0 0 5px rgba(235,74,85,.13),0 0 24px rgba(235,74,85,.28)}}.danger{color:#ff9ca1}.spacer{flex:1}.exportGroup{display:inline-flex;align-items:stretch;gap:0}.exportGroup select{min-height:40px;border:1px solid #68ea9d;border-right:0;background:#111812;color:#dff8e7;border-radius:9px 0 0 9px;padding:0 30px 0 10px;font-weight:900;font-size:12px;outline:none}.exportGroup button{border-radius:0 9px 9px 0}.recBadge{display:none;margin-left:8px;color:#ff8b93;font-size:11px;font-weight:900;letter-spacing:.08em}.recBadge.show{display:inline-block}.main{padding:14px}.statusrow{display:grid;grid-template-columns:minmax(220px,1fr) auto;gap:16px;align-items:end;margin-bottom:10px}.filename{font-size:14px;font-weight:900}.status{margin-top:3px;color:var(--muted);font-size:12px}.clock{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;text-align:right}.clock .now{font-size:27px;font-weight:900;letter-spacing:-.04em}.clock .total{font-size:11px;color:var(--muted)}.rulerWrap{border:1px solid var(--line);border-bottom:none;border-radius:14px 14px 0 0;overflow:hidden;background:#0a0d0b}.ruler{display:block;width:100%;height:30px}.timeline{position:relative;border:1px solid var(--line);border-radius:0 0 14px 14px;background:#080a09;overflow:auto}.canvasWrap{position:relative;min-width:100%;height:330px}.wave{display:block;height:330px;cursor:crosshair}.overlay{position:absolute;top:8px;right:9px;padding:5px 8px;border:1px solid rgba(255,255,255,.07);border-radius:7px;background:rgba(8,10,9,.78);color:#9ca89f;font-size:10px;pointer-events:none}.readouts{display:flex;flex-wrap:wrap;gap:16px;padding-top:9px;color:var(--muted);font-size:11px}.readouts strong{color:#dce7df}.transport{margin-top:12px;display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}.transport .left,.transport .center,.transport .right{display:flex;gap:7px;align-items:center}.transport .center{justify-content:center}.transport .right{justify-content:flex-end}.transport .center button{height:50px;min-width:58px;border-radius:11px}.transport .center .play{min-width:104px;font-size:14px}.lower{margin-top:12px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px}.card{border:1px solid var(--line);border-radius:12px;background:var(--panel2);padding:12px}.cardTitle{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#9aaa9e;font-weight:850;margin-bottom:8px}.meters{display:grid;grid-template-columns:1fr 1fr;gap:9px}.meterRow{display:grid;grid-template-columns:14px 1fr 38px;align-items:center;gap:6px;font-size:10px;color:var(--muted)}.meter{height:9px;border-radius:999px;background:#080b09;border:1px solid #2b342e;overflow:hidden}.meterFill{height:100%;width:0%;background:linear-gradient(90deg,#31c66d 0 70%,#efc94f 82%,#ef535b 100%)}.keygrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.key{border:1px solid #2b352e;border-radius:7px;padding:7px;text-align:center;color:#aeb9b1;font-size:9px;background:#0e120f}.key b{display:block;color:#fff;font-size:10px;margin-bottom:2px}.markers{display:flex;flex-wrap:wrap;gap:6px}.marker{border:1px solid #344039;background:#0d120f;border-radius:999px;padding:4px 8px;font-size:10px;color:#c7d1ca;cursor:pointer}.footer{margin-top:9px;color:#667269;font-size:10px;text-align:center}@media(max-width:850px){body{padding:8px}.build{display:none}.statusrow{grid-template-columns:1fr}.clock{text-align:left}.transport{grid-template-columns:1fr}.transport .left,.transport .center,.transport .right{justify-content:center;flex-wrap:wrap}.lower{grid-template-columns:1fr}}
+</style>
+<style id="build006-fullscreen-layout">
+html, body {
+  width: 100%;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+body {
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+body > * {
+  max-width: none !important;
+}
+.app, .app-shell, .editor, .editor-shell, .container, main, #app, #waveEditor, #audioDeck {
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box;
+}
+canvas {
+  max-width: none;
+}
+</style>
+
+
+<style id="build010-transport-buttons">
+.transport-icon{
+  width:58px;
+  min-width:58px;
+  height:52px;
+  padding:0 !important;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  line-height:1;
+  border-radius:7px;
+}
+#rec.transport-icon{font-size:27px;}
+#stop.transport-icon{font-size:23px;}
+</style>
+
+<style id="build012-file-shelf">
+.file-shelf{
+  margin:12px 14px 14px;
+  border:1px solid rgba(255,255,255,.14);
+  background:#0d100f;
+  border-radius:8px;
+  overflow:hidden;
+}
+.file-shelf-head{
+  min-height:38px;
+  padding:7px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+  background:#111512;
+}
+.file-shelf-title{
+  font-weight:800;
+  letter-spacing:.08em;
+  font-size:12px;
+}
+.active-file-label{
+  font-size:12px;
+  opacity:.72;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.file-list{
+  display:flex;
+  gap:8px;
+  padding:9px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  min-height:52px;
+}
+.file-item{
+  flex:0 0 auto;
+  min-width:190px;
+  max-width:260px;
+  height:36px;
+  padding:0 12px;
+  display:flex;
+  align-items:center;
+  border:1px solid rgba(255,255,255,.14);
+  background:#151a17;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:13px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.file-item:hover{filter:brightness(1.15);}
+.file-item.active{
+  outline:2px solid currentColor;
+  font-weight:800;
+}
+.file-list-empty{
+  opacity:.5;
+  font-size:12px;
+  padding:9px 2px;
+}
+</style>
+
+</head><body><div class="app">
+<div class="topbar"><div class="brand"><div class="logo">BM</div><div class="title"><h1>Bernie Wave Editor</h1><p>Single-Track Recorder • Fast VoxPro-Style Editing</p></div></div><div class="build">VERSION 2.0 · Build 012</div></div>
+<div class="workspace">
+<div class="toolbar">
+<label class="fileLabel primary">OPEN AUDIO<input id="file" type="file" accept="audio/*"></label>
+
+<span class="spacer"></span>
+<button id="cut">CUT</button><button id="copy">COPY</button><button id="paste">PASTE</button><button id="del" class="danger">DELETE</button><button id="undo">UNDO</button>
+<button id="trim">TRIM</button><button id="fadeIn">FADE IN</button><button id="fadeOut">FADE OUT</button><button id="normalize">NORMALIZE</button><button id="marker">+ MARK</button><span class="exportGroup"><select id="exportFormat" aria-label="Export format"><option value="wav">WAV</option><option value="mp3">MP3</option></select><button id="export" class="primary">EXPORT</button></span>
+</div>
+<div class="main">
+<div class="statusrow"><div><div class="filename" id="filename">Untitled <span id="recBadge" class="recBadge">● LIVE WAVEFORM</span></div><div class="status" id="status">Record or open an audio file. Drag across the waveform to select audio.</div></div><div class="clock"><div class="now" id="current">00:00.000</div><div class="total" id="total">TOTAL 00:00.000</div></div></div>
+<div class="rulerWrap"><canvas id="ruler" class="ruler" width="1800" height="30"></canvas></div>
+<div class="timeline" id="timeline"><div class="canvasWrap" id="wrap"><canvas id="wave" class="wave" width="1800" height="330"></canvas><div class="overlay">Mouse wheel = zoom · Drag = select · Double-click = move playhead</div></div></div>
+<div class="readouts"><span><strong>Selection:</strong> <span id="sel">None</span></span><span><strong>Playhead:</strong> <span id="playhead">00:00.000</span></span><span><strong>Zoom:</strong> <span id="zoom">60 px/sec</span></span></div>
+<div class="transport"><div class="left"><button data-jump="-30">−30 SEC</button><button data-jump="-5">−5 SEC</button><button data-jump="-1">−1 SEC</button></div><div class="center"><button id="home">|◀</button><button id="jogLeft" class="transport-icon" type="button" title="Jog left (A)" aria-label="Jog left">◀</button><button id="play" class="play transport-icon" type="button" title="Play/Pause" aria-label="Play/Pause">▶</button><button id="stop" class="transport-icon" type="button" title="Stop" aria-label="Stop">■</button><button id="rec" class="record transport-icon" type="button" title="Record" aria-label="Record">●</button><button id="jogRight" class="transport-icon" type="button" title="Jog right (L)" aria-label="Jog right">▶</button></div><div class="right"><button data-jump="1">+1 SEC</button><button data-jump="5">+5 SEC</button><button data-jump="30">+30 SEC</button></div></div>
+<div class="lower"><div class="card"><div class="cardTitle">Input Level</div><div class="meters"><div class="meterRow"><span>L</span><div class="meter"><div id="meterL" class="meterFill"></div></div><span id="dbL">−∞</span></div><div class="meterRow"><span>R</span><div class="meter"><div id="meterR" class="meterFill"></div></div><span id="dbR">−∞</span></div></div><div class="cardTitle" style="margin-top:12px">Marks</div><div id="markers" class="markers"><span style="color:var(--muted);font-size:11px">No marks yet.</span></div></div><div class="card"><div class="cardTitle">Fast Keys</div><div class="keygrid"><div class="key"><b>SPACE</b>Play/Pause</div><div class="key"><b>R</b>Record</div><div class="key"><b>DELETE</b>Delete</div><div class="key"><b>A / L</b>Jog left / right</div><div class="key"><b>← / →</b>1 sec</div><div class="key"><b>CTRL + Z</b>Undo</div></div></div></div>
+<div class="footer">Bernie Wave Editor · Version 2.0 · Build 012 · Single-track VoxPro-style workflow</div>
+</div></div></div>
+<script src="node_modules/lamejs/lame.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);let ac=null,buffer=null,playhead=0,playing=false,srcNode=null,playStartCtx=0,playStartPos=0,timer=null,selA=null,selB=null,drag=false,clipboard=null,history=[],zoomPPS=60,livePeaks=[],recordStart=0,recordingLive=false,liveWaveRAF=0,stream=null,rec=null,chunks=[],analyser=null,meterRAF=null,session='Untitled',marks=[];
+function ensureAC(){return ac||(ac=new (window.AudioContext||window.webkitAudioContext)())}function fmt(s){s=Number.isFinite(s)?Math.max(0,s):0;let m=Math.floor(s/60),x=s-m*60;return String(m).padStart(2,'0')+':'+x.toFixed(3).padStart(6,'0')}function dur(){return buffer?buffer.duration:0}function selection(){if(selA==null||selB==null)return null;let a=Math.min(selA,selB),b=Math.max(selA,selB);return b-a>.002?[a,b]:null}function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function cloneBuffer(b){const c=ensureAC().createBuffer(b.numberOfChannels,b.length,b.sampleRate);for(let i=0;i<b.numberOfChannels;i++)c.copyToChannel(b.getChannelData(i),0);return c}function saveHistory(){if(buffer){history.push(cloneBuffer(buffer));if(history.length>20)history.shift()}}function setBuffer(b,msg){buffer=b;playhead=clamp(playhead,0,dur());selA=selB=null;resize();draw();update();if(msg)$('status').textContent=msg}
+function slice(b,a,z){const sr=b.sampleRate,s=Math.floor(a*sr),e=Math.floor(z*sr),len=Math.max(1,e-s),o=ensureAC().createBuffer(b.numberOfChannels,len,sr);for(let c=0;c<b.numberOfChannels;c++)o.copyToChannel(b.getChannelData(c).slice(s,e),0);return o}function concat(parts){const sr=parts[0].sampleRate,ch=Math.max(...parts.map(p=>p.numberOfChannels)),len=parts.reduce((n,p)=>n+p.length,0),o=ensureAC().createBuffer(ch,len,sr);let off=0;for(const p of parts){for(let c=0;c<ch;c++)o.getChannelData(c).set(p.getChannelData(Math.min(c,p.numberOfChannels-1)),off);off+=p.length}return o}
+function resize(){const w=Math.max(1200,Math.ceil(Math.max(dur(),10)*zoomPPS));$('wave').width=w;$('ruler').width=w;$('wrap').style.width=w+'px';drawRuler()}function drawRuler(){const c=$('ruler'),x=c.getContext('2d'),w=c.width,h=c.height;x.clearRect(0,0,w,h);x.fillStyle='#0a0d0b';x.fillRect(0,0,w,h);x.strokeStyle='#344039';x.fillStyle='#91a096';x.font='10px Consolas';let step=zoomPPS>=120?.5:zoomPPS>=60?1:5;const rulerDuration=recordingLive?Math.max(10,(performance.now()-recordStart)/1000):dur();for(let t=0;t<=rulerDuration+10;t+=step){let px=t*zoomPPS;x.beginPath();x.moveTo(px,h);x.lineTo(px,t%5===0?8:17);x.stroke();if(Math.abs(t%5)<.001)x.fillText(fmt(t).slice(0,5),px+3,10)}}
+function drawLiveRecording(){const c=$('wave'),x=c.getContext('2d'),w=c.width,h=c.height,mid=h/2;x.clearRect(0,0,w,h);x.fillStyle='#080a09';x.fillRect(0,0,w,h);x.strokeStyle='#152019';for(let y=0;y<h;y+=55){x.beginPath();x.moveTo(0,y);x.lineTo(w,y);x.stroke()}if(!livePeaks.length)return;const visible=Math.min(w,livePeaks.length);const start=Math.max(0,livePeaks.length-w);x.strokeStyle='#49df86';x.lineWidth=1.4;x.beginPath();for(let px=0;px<visible;px++){const peak=livePeaks[start+px]||0;x.moveTo(px,mid-peak*mid*.9);x.lineTo(px,mid+peak*mid*.9)}x.stroke();const p=Math.max(0,visible-1);x.strokeStyle='#ff5c66';x.lineWidth=2;x.beginPath();x.moveTo(p,0);x.lineTo(p,h);x.stroke()}
+function draw(){if(recordingLive){drawLiveRecording();return}const c=$('wave'),x=c.getContext('2d'),w=c.width,h=c.height,mid=h/2;x.clearRect(0,0,w,h);x.fillStyle='#080a09';x.fillRect(0,0,w,h);x.strokeStyle='#152019';for(let y=0;y<h;y+=55){x.beginPath();x.moveTo(0,y);x.lineTo(w,y);x.stroke()}if(buffer){const d=buffer.getChannelData(0),spp=Math.max(1,Math.floor(d.length/(dur()*zoomPPS)));x.strokeStyle='#49df86';x.lineWidth=1;x.beginPath();for(let px=0;px<Math.min(w,dur()*zoomPPS);px++){let st=Math.floor(px*spp),en=Math.min(d.length,st+spp),mn=1,mx=-1;for(let i=st;i<en;i++){let v=d[i];if(v<mn)mn=v;if(v>mx)mx=v}x.moveTo(px,mid+mn*mid*.88);x.lineTo(px,mid+mx*mid*.88)}x.stroke();const s=selection();if(s){let a=s[0]*zoomPPS,b=s[1]*zoomPPS;x.fillStyle='rgba(255,255,255,.12)';x.fillRect(a,0,b-a,h);x.strokeStyle='#edf5ef';x.lineWidth=2;x.strokeRect(a,1,b-a,h-2)}for(const m of marks){let px=m*zoomPPS;x.strokeStyle='#e1b84c';x.lineWidth=1;x.beginPath();x.moveTo(px,0);x.lineTo(px,h);x.stroke()}let p=playhead*zoomPPS;x.strokeStyle='#ff5c66';x.lineWidth=2;x.beginPath();x.moveTo(p,0);x.lineTo(p,h);x.stroke()}}
+function update(){const s=selection();$('sel').textContent=s?fmt(s[0])+' → '+fmt(s[1])+' ('+fmt(s[1]-s[0])+')':'None';$('playhead').textContent=fmt(playhead);const liveTime=recordingLive?Math.max(0,(performance.now()-recordStart)/1000):playhead;$('current').textContent=fmt(liveTime);$('total').textContent='TOTAL '+fmt(recordingLive?liveTime:dur());$('zoom').textContent=Math.round(zoomPPS)+' px/sec'}
+function eventTime(e){const r=$('wave').getBoundingClientRect(),scale=$('wave').width/r.width;return clamp((e.clientX-r.left)*scale/zoomPPS,0,dur())}$('wave').addEventListener('pointerdown',e=>{if(!buffer)return;drag=true;selA=selB=eventTime(e);$('wave').setPointerCapture(e.pointerId);draw();update()});$('wave').addEventListener('pointermove',e=>{if(drag){selB=eventTime(e);draw();update()}});$('wave').addEventListener('pointerup',e=>{drag=false;selB=eventTime(e);draw();update()});$('wave').addEventListener('dblclick',e=>{playhead=eventTime(e);draw();update()});$('timeline').addEventListener('wheel',e=>{if(!buffer)return;e.preventDefault();zoomPPS=clamp(zoomPPS*(e.deltaY<0?1.15:.87),20,500);resize();draw();update()},{passive:false});
+$('file').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{$('status').textContent='Loading '+f.name+'…';const b=await ensureAC().decodeAudioData(await f.arrayBuffer());session=f.name.replace(/\.[^.]+$/,'');$('filename').textContent=session;history=[];setBuffer(b,'Audio loaded. Drag across the waveform to select.') }catch{$('status').textContent='Could not decode that audio file.'}e.target.value=''});
+function stopPlay(reset=false){if(srcNode){try{srcNode.stop()}catch{}srcNode=null}playing=false;clearInterval(timer);$('play').textContent='▶';if(reset)playhead=0;draw();update()}function play(){if(!buffer)return $('status').textContent='Open or record audio first.';if(playing)return stopPlay(false);const ctx=ensureAC();if(ctx.state==='suspended')ctx.resume();const s=selection();let end=dur();if(s&&playhead>=s[0]&&playhead<s[1])end=s[1];srcNode=ctx.createBufferSource();srcNode.buffer=buffer;srcNode.connect(ctx.destination);srcNode.start(0,playhead,Math.max(.001,end-playhead));playing=true;playStartCtx=ctx.currentTime;playStartPos=playhead;$('play').textContent='❚❚';srcNode.onended=()=>{if(playing){playing=false;playhead=end;$('play').textContent='▶';draw();update()}};timer=setInterval(()=>{if(!playing)return;playhead=Math.min(end,playStartPos+(ctx.currentTime-playStartCtx));draw();update()},30)}$('play').onclick=play;$('stop').onclick=()=>stopPlay(true);$('home').onclick=()=>{stopPlay(false);playhead=0;draw();update()};document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{stopPlay(false);playhead=clamp(playhead+Number(b.dataset.jump),0,dur());draw();update()});
+async function copySel(){const s=selection();if(!s)return $('status').textContent='Select audio first.';clipboard=slice(buffer,s[0],s[1]);$('status').textContent='Selection copied.'}function deleteSel(cut=false){const s=selection();if(!s)return $('status').textContent='Select audio first.';if(cut)clipboard=slice(buffer,s[0],s[1]);saveHistory();const parts=[];if(s[0]>0)parts.push(slice(buffer,0,s[0]));if(s[1]<dur())parts.push(slice(buffer,s[1],dur()));if(parts.length)setBuffer(parts.length===1?parts[0]:concat(parts),cut?'Selection cut.':'Selection deleted.');else setBuffer(ensureAC().createBuffer(1,1,48000),'Audio cleared.');playhead=clamp(s[0],0,dur())}$('copy').onclick=copySel;$('cut').onclick=()=>deleteSel(true);$('del').onclick=()=>deleteSel(false);$('paste').onclick=()=>{if(!clipboard)return $('status').textContent='Clipboard is empty.';saveHistory();const parts=[];if(playhead>0)parts.push(slice(buffer,0,playhead));parts.push(clipboard);if(playhead<dur())parts.push(slice(buffer,playhead,dur()));setBuffer(concat(parts),'Pasted at playhead.')};$('trim').onclick=()=>{const s=selection();if(!s)return $('status').textContent='Select the audio you want to keep.';saveHistory();setBuffer(slice(buffer,s[0],s[1]),'Trimmed to selection.');playhead=0};$('undo').onclick=()=>{if(!history.length)return $('status').textContent='Nothing to undo.';setBuffer(history.pop(),'Last edit undone.')};
+function applyFade(kind){const s=selection();if(!s)return $('status').textContent='Select a fade region first.';saveHistory();const out=cloneBuffer(buffer),sr=out.sampleRate,a=Math.floor(s[0]*sr),b=Math.floor(s[1]*sr),len=Math.max(1,b-a);for(let c=0;c<out.numberOfChannels;c++){let d=out.getChannelData(c);for(let i=a;i<b;i++){let g=kind==='in'?(i-a)/len:(b-i)/len;d[i]*=g}}setBuffer(out,kind==='in'?'Fade-in applied.':'Fade-out applied.')}$('fadeIn').onclick=()=>applyFade('in');$('fadeOut').onclick=()=>applyFade('out');$('normalize').onclick=()=>{if(!buffer)return;saveHistory();const out=cloneBuffer(buffer);let peak=0;for(let c=0;c<out.numberOfChannels;c++)for(const v of out.getChannelData(c))peak=Math.max(peak,Math.abs(v));if(peak>0){let g=.98/peak;for(let c=0;c<out.numberOfChannels;c++){let d=out.getChannelData(c);for(let i=0;i<d.length;i++)d[i]=clamp(d[i]*g,-1,1)}}setBuffer(out,'Normalized to 98% peak.')};
+function renderMarks(){const el=$('markers');el.innerHTML='';if(!marks.length){el.innerHTML='<span style="color:var(--muted);font-size:11px">No marks yet.</span>';return}marks.forEach((m,i)=>{let b=document.createElement('button');b.className='marker';b.textContent='M'+(i+1)+' '+fmt(m);b.onclick=()=>{playhead=m;draw();update()};el.appendChild(b)})}$('marker').onclick=()=>{if(!buffer)return;marks.push(playhead);marks.sort((a,b)=>a-b);renderMarks();draw()};
+function setMeters(v){let pct=Math.min(100,Math.max(0,v*140));$('meterL').style.width=pct+'%';$('meterR').style.width=(pct*.95)+'%';let db=v>0?20*Math.log10(v):-99;$('dbL').textContent=db>-90?db.toFixed(0):'−∞';$('dbR').textContent=db>-90?(db-.5).toFixed(0):'−∞'}function meterLoop(){if(!analyser)return;const d=new Uint8Array(analyser.fftSize);analyser.getByteTimeDomainData(d);let sum=0,peak=0;for(const v of d){let n=(v-128)/128;sum+=n*n;peak=Math.max(peak,Math.abs(n))}setMeters(Math.sqrt(sum/d.length));if(recordingLive){livePeaks.push(peak);const seconds=(performance.now()-recordStart)/1000;const wanted=Math.max(1200,Math.ceil(Math.max(seconds,10)*zoomPPS));if($('wave').width!==wanted){$('wave').width=wanted;$('ruler').width=wanted;$('wrap').style.width=wanted+'px';drawRuler()}drawLiveRecording();update();$('timeline').scrollLeft=$('timeline').scrollWidth}meterRAF=requestAnimationFrame(meterLoop)}
+$('rec').onclick=async()=>{if(rec&&rec.state!=='inactive')return;try{stream=await navigator.mediaDevices.getUserMedia({audio:true});const ctx=ensureAC();const ms=ctx.createMediaStreamSource(stream);analyser=ctx.createAnalyser();analyser.fftSize=1024;ms.connect(analyser);livePeaks=[];recordStart=performance.now();recordingLive=true;$('recBadge').classList.add('show');playhead=0;resize();meterLoop();chunks=[];let type=['audio/webm;codecs=opus','audio/ogg;codecs=opus','audio/mp4'].find(t=>MediaRecorder.isTypeSupported?.(t));rec=new MediaRecorder(stream,type?{mimeType:type}:undefined);rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};rec.onstop=async()=>{recordingLive=false;cancelAnimationFrame(meterRAF);cancelAnimationFrame(liveWaveRAF);analyser=null;setMeters(0);stream.getTracks().forEach(t=>t.stop());$('rec').classList.remove('active');$('rec').textContent='●';$('recBadge').classList.remove('show');try{const b=await ctx.decodeAudioData(await new Blob(chunks,{type:rec.mimeType}).arrayBuffer());saveHistory();session='Recording '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});$('filename').childNodes[0].nodeValue=session+' ';playhead=0;setBuffer(b,'Recording ready to edit. Live waveform replaced with the editable waveform.')}catch{$('status').textContent='Recording captured but could not be decoded.';resize();draw();update()}};rec.start(250);$('rec').classList.add('active');$('rec').textContent='● RECORDING';$('status').textContent='Recording… waveform is being built live.'}catch{$('status').textContent='Microphone access failed. Allow microphone permission.'}};($('stopRec')||document.createElement('button')).onclick=()=>{if(rec&&rec.state!=='inactive')rec.stop()};
+function wav(b){const ch=b.numberOfChannels,sr=b.sampleRate,frames=b.length,bytes=frames*ch*2,ab=new ArrayBuffer(44+bytes),v=new DataView(ab);let p=0;const str=s=>{for(let i=0;i<s.length;i++)v.setUint8(p++,s.charCodeAt(i))},u32=n=>{v.setUint32(p,n,true);p+=4},u16=n=>{v.setUint16(p,n,true);p+=2};str('RIFF');u32(36+bytes);str('WAVE');str('fmt ');u32(16);u16(1);u16(ch);u32(sr);u32(sr*ch*2);u16(ch*2);u16(16);str('data');u32(bytes);const ds=[];for(let c=0;c<ch;c++)ds.push(b.getChannelData(c));for(let i=0;i<frames;i++)for(let c=0;c<ch;c++){let x=clamp(ds[c][i],-1,1);v.setInt16(p,x<0?x*32768:x*32767,true);p+=2}return ab}
+function downloadBlob(blob,ext){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=(session||'bernie-wave')+'.'+ext;a.click();setTimeout(()=>URL.revokeObjectURL(u),1500)}
+function mp3(b){if(typeof lamejs==='undefined')throw new Error('MP3 encoder unavailable');const channels=Math.min(2,b.numberOfChannels),sr=b.sampleRate,encoder=new lamejs.Mp3Encoder(channels,sr,192),block=1152,out=[];const pcm=[];for(let c=0;c<channels;c++){const f=b.getChannelData(c),i16=new Int16Array(f.length);for(let i=0;i<f.length;i++){const v=clamp(f[i],-1,1);i16[i]=v<0?v*32768:v*32767}pcm.push(i16)}for(let i=0;i<b.length;i+=block){let encoded=channels===1?encoder.encodeBuffer(pcm[0].subarray(i,i+block)):encoder.encodeBuffer(pcm[0].subarray(i,i+block),pcm[1].subarray(i,i+block));if(encoded.length)out.push(new Uint8Array(encoded))}const end=encoder.flush();if(end.length)out.push(new Uint8Array(end));return new Blob(out,{type:'audio/mpeg'})}
+$('export').onclick=()=>{if(!buffer)return $('status').textContent='Nothing to export.';const format=$('exportFormat').value;try{if(format==='mp3'){ $('status').textContent='Encoding MP3…';downloadBlob(mp3(buffer),'mp3');$('status').textContent='MP3 exported at 192 kbps.'}else{downloadBlob(new Blob([wav(buffer)],{type:'audio/wav'}),'wav');$('status').textContent='WAV exported.'}}catch(e){$('status').textContent='Export failed: '+e.message}};
+recorder.stop();}},true);
+
+function setPlayIcon(isPlaying){
+  const b=$('play');
+  if(b) b.textContent=isPlaying?'❚❚':'▶';
+}
+function stopTransport(){
+  if(recording){
+    try{
+      if(recorder && recorder.state!=='inactive') recorder.stop();
+    }catch(e){ console.error(e); }
+    return;
+  }
+  stopPlay(false);
+  setPlayIcon(false);
+}
+function toggleTransportPlay(){
+  if(!buffer || recording) return;
+  play();
+  setTimeout(()=>{
+    try{
+      setPlayIcon(!!source);
+    }catch(e){}
+  },0);
+}
+function startTransportRecord(){
+  if(recording) return;
+  const b=$('rec');
+  if(b) b.click();
+}
+setTimeout(()=>{
+  const jl=$('jogLeft'), jr=$('jogRight'), pb=$('play'), sb=$('stop'), rb=$('rec');
+  if(jl) jl.onclick=()=>jog(-1);
+  if(jr) jr.onclick=()=>jog(1);
+  if(pb) pb.onclick=()=>toggleTransportPlay();
+  if(sb) sb.onclick=()=>stopTransport();
+  // keep existing record button click behavior if already assigned elsewhere
+},0);
+
+
+const FILE_DB_NAME='BernieWaveEditorFiles';
+const FILE_DB_STORE='cuts';
+let fileDb=null;
+let activeFileId=null;
+let pendingRecordFile=null;
+
+function openFileDb(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(FILE_DB_NAME,1);
+    req.onupgradeneeded=()=>{
+      const db=req.result;
+      if(!db.objectStoreNames.contains(FILE_DB_STORE)){
+        const store=db.createObjectStore(FILE_DB_STORE,{keyPath:'id',autoIncrement:true});
+        store.createIndex('createdAt','createdAt');
+        store.createIndex('name','name');
+      }
+    };
+    req.onsuccess=()=>{fileDb=req.result;resolve(fileDb)};
+    req.onerror=()=>reject(req.error);
+  });
+}
+function dbStore(mode='readonly'){
+  return fileDb.transaction(FILE_DB_STORE,mode).objectStore(FILE_DB_STORE);
+}
+function getAllCuts(){
+  return new Promise((resolve,reject)=>{
+    const req=dbStore().getAll();
+    req.onsuccess=()=>resolve((req.result||[]).sort((a,b)=>b.createdAt-a.createdAt));
+    req.onerror=()=>reject(req.error);
+  });
+}
+function putCut(cut){
+  return new Promise((resolve,reject)=>{
+    const req=dbStore('readwrite').put(cut);
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+function getCut(id){
+  return new Promise((resolve,reject)=>{
+    const req=dbStore().get(id);
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+function mmddyy(d=new Date()){
+  return String(d.getMonth()+1).padStart(2,'0')+
+    String(d.getDate()).padStart(2,'0')+
+    String(d.getFullYear()).slice(-2);
+}
+async function nextDefaultFilename(){
+  const prefix=mmddyy()+' Untitled ';
+  const cuts=await getAllCuts();
+  let max=0;
+  for(const c of cuts){
+    if(typeof c.name==='string' && c.name.startsWith(prefix)){
+      const n=parseInt(c.name.slice(prefix.length),10);
+      if(Number.isFinite(n)) max=Math.max(max,n);
+    }
+  }
+  return prefix+String(max+1).padStart(3,'0');
+}
+function audioBufferToWavBlob(buf){
+  const numCh=buf.numberOfChannels;
+  const sr=buf.sampleRate;
+  const frames=buf.length;
+  const blockAlign=numCh*2;
+  const ab=new ArrayBuffer(44+frames*blockAlign);
+  const view=new DataView(ab);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++)view.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,'RIFF'); view.setUint32(4,36+frames*blockAlign,true); ws(8,'WAVE');
+  ws(12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true);
+  view.setUint16(22,numCh,true); view.setUint32(24,sr,true);
+  view.setUint32(28,sr*blockAlign,true); view.setUint16(32,blockAlign,true);
+  view.setUint16(34,16,true); ws(36,'data'); view.setUint32(40,frames*blockAlign,true);
+  let off=44;
+  for(let i=0;i<frames;i++){
+    for(let ch=0;ch<numCh;ch++){
+      let s=Math.max(-1,Math.min(1,buf.getChannelData(ch)[i]));
+      view.setInt16(off,s<0?s*0x8000:s*0x7fff,true); off+=2;
+    }
+  }
+  return new Blob([ab],{type:'audio/wav'});
+}
+async function renderFileList(){
+  const list=$('fileList');
+  if(!list || !fileDb) return;
+  const cuts=await getAllCuts();
+  list.innerHTML='';
+  if(!cuts.length){
+    const e=document.createElement('div');
+    e.className='file-list-empty'; e.textContent='No recordings yet';
+    list.appendChild(e); return;
+  }
+  for(const c of cuts){
+    const b=document.createElement('button');
+    b.type='button'; b.className='file-item'+(c.id===activeFileId?' active':'');
+    b.textContent=c.name; b.title=c.name;
+    b.onclick=()=>loadCut(c.id);
+    list.appendChild(b);
+  }
+}
+async function loadCut(id){
+  const cut=await getCut(id);
+  if(!cut || !cut.wavBlob) return;
+  stopPlay(false);
+  const arr=await cut.wavBlob.arrayBuffer();
+  buffer=await ctx.decodeAudioData(arr.slice(0));
+await saveRecordedBufferAsCut();
+  playhead=0; selA=null; selB=null; activeFileId=cut.id;
+  const label=$('activeFileLabel'); if(label) label.textContent=cut.name;
+  draw(); update(); await renderFileList();
+}
+async function createPendingRecordFile(){
+  const name=await nextDefaultFilename();
+  pendingRecordFile={name,createdAt:Date.now(),wavBlob:null};
+  const label=$('activeFileLabel'); if(label) label.textContent=name+' (recording)';
+}
+async function saveRecordedBufferAsCut(){
+  if(!buffer) return;
+  if(!pendingRecordFile) await createPendingRecordFile();
+  const cut={...pendingRecordFile,wavBlob:audioBufferToWavBlob(buffer)};
+  const id=await putCut(cut);
+  activeFileId=id;
+  pendingRecordFile=null;
+  const saved=await getCut(id);
+  const label=$('activeFileLabel'); if(label) label.textContent=saved?.name||'Saved';
+  await renderFileList();
+}
+openFileDb().then(()=>renderFileList()).catch(console.error);
+
+setTimeout(()=>{
+  const rb=$('rec');
+  if(rb){
+    rb.addEventListener('click',async()=>{ if(!recording) await createPendingRecordFile(); },true);
+  }
+},0);
+
+
+const JOG_STEP=.1;function jog(dir){if(!buffer)return;stopPlay(false);playhead=clamp(playhead+(dir*JOG_STEP),0,dur());draw();update()};window.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;const k=e.key.toLowerCase();if(e.code==='Space'){e.preventDefault();play()}else if(k==='r')$('rec').click();else if(k==='a'){e.preventDefault();jog(-1)}else if(k==='l'){e.preventDefault();jog(1)}else if(e.key==='Delete')deleteSel(false);else if((e.ctrlKey||e.metaKey)&&k==='z'){$('undo').click();e.preventDefault()}else if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();let n=e.shiftKey?5:1;playhead=clamp(playhead+(e.key==='ArrowRight'?n:-n),0,dur());draw();update()}});resize();draw();update();renderMarks();
+</script>
+<section id="fileShelf" class="file-shelf">
+  <div class="file-shelf-head">
+    <div class="file-shelf-title">FILES / CUTS</div>
+    <div id="activeFileLabel" class="active-file-label">No file loaded</div>
+  </div>
+  <div id="fileList" class="file-list"></div>
+</section>
+
+</body></html>

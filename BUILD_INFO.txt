@@ -1,0 +1,10 @@
+Bernie Wave Editor
+Version 2.0
+Build 012
+Changes:
+- Each Record starts a new persistent cut/file.
+- Default filename format: MMDDYY Untitled 001, 002, 003...
+- Numbering resets by date.
+- Added VoxPro-style FILES / CUTS shelf at bottom.
+- Click a saved cut to load it back into the waveform.
+- Current file is highlighted.
