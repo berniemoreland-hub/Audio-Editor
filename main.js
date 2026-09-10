@@ -16,7 +16,7 @@ function createWindow() {
     title: 'VOX-BERNIE',
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload-entry.js'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
