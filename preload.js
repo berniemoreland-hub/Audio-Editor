@@ -32,6 +32,40 @@ window.addEventListener('DOMContentLoaded', () => {
   const lower = document.querySelector('.lower');
   if (lower) lower.style.gridTemplateColumns = '1fr';
 
+  // Fit the full editor inside a normal maximized Windows work area.
+  const fitStyle = document.createElement('style');
+  fitStyle.textContent = `
+    html,body{height:100%;overflow:hidden}
+    body{padding:8px}
+    .app{height:100%;display:flex;flex-direction:column;min-height:0}
+    .topbar{flex:0 0 auto;margin-bottom:6px}
+    .workspace{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+    .toolbar{flex:0 0 auto;padding:7px;gap:5px}
+    .toolbar button,.toolbar .fileLabel{min-height:34px;padding:0 9px;font-size:11px}
+    .main{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:8px;overflow:hidden}
+    .statusrow{flex:0 0 auto;margin-bottom:5px}
+    .clock .now{font-size:22px}
+    .timeline{flex:1 1 auto;min-height:150px}
+    .wave{height:100%;min-height:150px}
+    .readouts{flex:0 0 auto;padding-top:4px}
+    .transport{flex:0 0 auto;margin-top:6px;gap:5px}
+    .transport button{height:42px;min-height:42px;min-width:72px;padding:0 8px}
+    .transport .play,.transport .record{min-width:90px}
+    .lower{flex:0 0 auto;margin-top:6px}
+    .card{padding:7px}.cardTitle{margin-bottom:4px}
+    .fileShelf{flex:0 0 auto;margin-top:6px}
+    .fileList{min-height:44px;padding:5px}.fileItem{height:32px}
+    .fileShelfHead{padding:6px 8px}
+    .footer{flex:0 0 auto;margin-top:4px}
+    @media(max-height:800px){
+      .logo{width:36px;height:36px}.title h1{font-size:18px}.title p{font-size:10px}
+      .wave{min-height:120px}.timeline{min-height:120px}
+      .transport button{height:38px;min-height:38px}
+      .lower{margin-top:4px}.card{padding:5px}.fileShelf{margin-top:4px}
+    }
+  `;
+  document.head.appendChild(fitStyle);
+
   const settingsBody = document.querySelector('.settingsBody');
   if (settingsBody) {
     const wrap = document.createElement('details');
