@@ -1,18 +1,22 @@
 {
   "name": "bernie-wave-editor",
-  "version": "2.0.12",
+  "version": "2.0.15",
   "description": "Single-track VoxPro-style desktop waveform recorder and audio editor",
   "main": "main.js",
   "author": "Bernie Mack Productions",
   "license": "UNLICENSED",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win nsis",
+    "dist": "electron-builder --win nsis --publish never",
     "dist:portable": "electron-builder --win portable"
   },
   "devDependencies": {
     "electron": "44.3.0",
     "electron-builder": "26.15.3"
+  },
+  "dependencies": {
+    "electron-updater": "6.6.2",
+    "lamejs": "1.2.1"
   },
   "build": {
     "appId": "com.berniemack.waveeditor",
@@ -24,11 +28,15 @@
       "index.html",
       "package.json"
     ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "berniemoreland-hub",
+        "repo": "Audio-Editor"
+      }
+    ],
     "win": {
-      "target": [
-        "nsis"
-      ],
-      "artifactName": "Bernie-Wave-Editor-${version}-${arch}.${ext}"
+      "target": ["nsis"]
     },
     "nsis": {
       "oneClick": false,
@@ -39,8 +47,5 @@
       "artifactName": "Bernie Wave Editor Setup.${ext}"
     }
   },
-  "buildNumber": "012",
-  "dependencies": {
-    "lamejs": "1.2.1"
-  }
+  "buildNumber": "015"
 }
