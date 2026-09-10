@@ -1,8 +1,9 @@
-const { app, BrowserWindow, session, Menu, dialog } = require('electron');
+const { app, BrowserWindow, session, Menu, dialog, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 
 let mainWindow = null;
+let updaterReady = false;
 
 function createWindow() {
   const appVersion = app.getVersion();
@@ -29,10 +30,30 @@ function setupAutoUpdater() {
   if (!app.isPackaged) return;
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
+  updaterReady = true;
+
   autoUpdater.on('update-available', info => {
-    if (mainWindow) mainWindow.setTitle(`Bernie Wave Editor — Updating to ${info.version}…`);
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-status', { state: 'downloading', version: info.version });
+    }
   });
+
+  autoUpdater.on('update-not-available', info => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-status', { state: 'current', version: info.version || app.getVersion() });
+    }
+  });
+
+  autoUpdater.on('download-progress', progress => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-status', { state: 'progress', percent: Math.round(progress.percent || 0) });
+    }
+  });
+
   autoUpdater.on('update-downloaded', async info => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-status', { state: 'ready', version: info.version });
+    }
     const result = await dialog.showMessageBox(mainWindow, {
       type: 'info',
       buttons: ['Restart & Install', 'Later'],
@@ -44,9 +65,29 @@ function setupAutoUpdater() {
     });
     if (result.response === 0) autoUpdater.quitAndInstall(false, true);
   });
-  autoUpdater.on('error', error => console.error('Auto-update error:', error));
-  setTimeout(() => autoUpdater.checkForUpdates().catch(console.error), 5000);
+
+  autoUpdater.on('error', error => {
+    console.error('Auto-update error:', error);
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-status', { state: 'error', message: error.message || String(error) });
+    }
+  });
 }
+
+ipcMain.handle('check-for-updates', async () => {
+  if (!app.isPackaged || !updaterReady) {
+    return { ok: false, state: 'unavailable', message: 'Updates are available in the installed Windows app.' };
+  }
+  try {
+    const result = await autoUpdater.checkForUpdates();
+    const latest = result?.updateInfo?.version || app.getVersion();
+    const current = app.getVersion();
+    if (latest === current) return { ok: true, state: 'current', version: current };
+    return { ok: true, state: 'downloading', version: latest };
+  } catch (error) {
+    return { ok: false, state: 'error', message: error.message || String(error) };
+  }
+});
 
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
