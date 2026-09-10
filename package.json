@@ -24,6 +24,7 @@
     "asar": true,
     "files": [
       "main.js",
+      "preload-entry.js",
       "preload.js",
       "stereo-monitor.js",
       "index.html",
