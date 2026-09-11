@@ -1,10 +1,18 @@
 const { app, BrowserWindow, session, Menu, dialog, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
+const http = require('http');
 const path = require('path');
 
 let mainWindow = null;
 let updaterReady = false;
 let updateDownloaded = false;
+let commandServer = null;
+
+const STREAM_DECK_PORT = 17631;
+const STREAM_DECK_COMMANDS = new Set([
+  'record','stop','play','jog-slow-left','jog-slow-right','jog-fast-left','jog-fast-right',
+  'cut','copy','paste','delete','undo','save','save-as','export'
+]);
 
 function createWindow() {
   const appVersion = app.getVersion();
@@ -27,6 +35,40 @@ function createWindow() {
   mainWindow.loadFile('index.html');
 }
 
+function setupStreamDeckBridge() {
+  if (commandServer) return;
+  commandServer = http.createServer((req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    if (req.method === 'GET' && req.url === '/health') {
+      res.writeHead(200); res.end(JSON.stringify({ ok:true, app:'VOX-BERNIE', version:app.getVersion() })); return;
+    }
+    if (req.method !== 'POST' || req.url !== '/command') {
+      res.writeHead(404); res.end(JSON.stringify({ ok:false })); return;
+    }
+    let body = '';
+    req.on('data', chunk => { body += chunk; if (body.length > 4096) req.destroy(); });
+    req.on('end', () => {
+      try {
+        const { command } = JSON.parse(body || '{}');
+        if (!STREAM_DECK_COMMANDS.has(command)) {
+          res.writeHead(400); res.end(JSON.stringify({ ok:false, error:'Unknown command' })); return;
+        }
+        if (!mainWindow || mainWindow.isDestroyed()) {
+          res.writeHead(503); res.end(JSON.stringify({ ok:false, error:'VOX-BERNIE window unavailable' })); return;
+        }
+        mainWindow.webContents.send('stream-deck-command', command);
+        res.writeHead(200); res.end(JSON.stringify({ ok:true, command }));
+      } catch (error) {
+        res.writeHead(400); res.end(JSON.stringify({ ok:false, error:error.message }));
+      }
+    });
+  });
+  commandServer.listen(STREAM_DECK_PORT, '127.0.0.1', () => {
+    console.log(`VOX-BERNIE Stream Deck bridge listening on 127.0.0.1:${STREAM_DECK_PORT}`);
+  });
+  commandServer.on('error', error => console.error('Stream Deck bridge error:', error));
+}
+
 function setupAutoUpdater() {
   if (!app.isPackaged) return;
   autoUpdater.autoDownload = true;
@@ -34,15 +76,9 @@ function setupAutoUpdater() {
   updaterReady = true;
   updateDownloaded = false;
 
-  autoUpdater.on('update-available', info => {
-    mainWindow?.webContents.send('update-status', { state: 'downloading', version: info.version });
-  });
-  autoUpdater.on('update-not-available', info => {
-    mainWindow?.webContents.send('update-status', { state: 'current', version: info.version || app.getVersion() });
-  });
-  autoUpdater.on('download-progress', progress => {
-    mainWindow?.webContents.send('update-status', { state: 'progress', percent: Math.round(progress.percent || 0) });
-  });
+  autoUpdater.on('update-available', info => mainWindow?.webContents.send('update-status', { state: 'downloading', version: info.version }));
+  autoUpdater.on('update-not-available', info => mainWindow?.webContents.send('update-status', { state: 'current', version: info.version || app.getVersion() }));
+  autoUpdater.on('download-progress', progress => mainWindow?.webContents.send('update-status', { state: 'progress', percent: Math.round(progress.percent || 0) }));
   autoUpdater.on('update-downloaded', async info => {
     updateDownloaded = true;
     mainWindow?.webContents.send('update-status', { state: 'ready', version: info.version });
@@ -83,8 +119,10 @@ app.whenReady().then(() => {
   session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => callback(permission === 'media'));
   session.defaultSession.setPermissionCheckHandler((webContents, permission) => permission === 'media');
   createWindow();
+  setupStreamDeckBridge();
   setupAutoUpdater();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
 
+app.on('before-quit', () => { try { commandServer?.close(); } catch {} });
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
