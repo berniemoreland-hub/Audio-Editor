@@ -1,6 +1,5 @@
 require('./preload.js');
 require('./stereo-monitor.js');
 require('./settings-ui-fix.js');
-require('./update-ui-fix.js');
 require('./waveform-resize.js');
-require('./rename-menu.js');
+require('./page-fixes-loader.js');
