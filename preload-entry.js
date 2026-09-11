@@ -4,3 +4,4 @@ require('./settings-ui-fix.js');
 require('./waveform-resize.js');
 require('./page-fixes-loader.js');
 require('./stream-deck-overlay.js');
+require('./stream-deck-bridge.js');
