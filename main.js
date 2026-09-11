@@ -4,6 +4,7 @@ const path = require('path');
 
 let mainWindow = null;
 let updaterReady = false;
+let updateDownloaded = false;
 
 function createWindow() {
   const appVersion = app.getVersion();
@@ -19,7 +20,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload-entry.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true,
+      sandbox: false,
       additionalArguments: [`--bernie-app-version=${appVersion}`]
     }
   });
@@ -31,77 +32,59 @@ function setupAutoUpdater() {
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
   updaterReady = true;
+  updateDownloaded = false;
 
   autoUpdater.on('update-available', info => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('update-status', { state: 'downloading', version: info.version });
-    }
+    mainWindow?.webContents.send('update-status', { state: 'downloading', version: info.version });
   });
-
   autoUpdater.on('update-not-available', info => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('update-status', { state: 'current', version: info.version || app.getVersion() });
-    }
+    mainWindow?.webContents.send('update-status', { state: 'current', version: info.version || app.getVersion() });
   });
-
   autoUpdater.on('download-progress', progress => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('update-status', { state: 'progress', percent: Math.round(progress.percent || 0) });
-    }
+    mainWindow?.webContents.send('update-status', { state: 'progress', percent: Math.round(progress.percent || 0) });
   });
-
   autoUpdater.on('update-downloaded', async info => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('update-status', { state: 'ready', version: info.version });
-    }
+    updateDownloaded = true;
+    mainWindow?.webContents.send('update-status', { state: 'ready', version: info.version });
     const result = await dialog.showMessageBox(mainWindow, {
-      type: 'info',
-      buttons: ['Restart & Install', 'Later'],
-      defaultId: 0,
-      cancelId: 1,
+      type: 'info', buttons: ['Restart & Install', 'Later'], defaultId: 0, cancelId: 1,
       title: 'VOX-BERNIE Update Ready',
       message: `VOX-BERNIE ${info.version} is ready to install.`,
       detail: 'Restart VOX-BERNIE now to install the new version.'
     });
     if (result.response === 0) autoUpdater.quitAndInstall(false, true);
   });
-
   autoUpdater.on('error', error => {
     console.error('Auto-update error:', error);
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('update-status', { state: 'error', message: error.message || String(error) });
-    }
+    mainWindow?.webContents.send('update-status', { state: 'error', message: error.message || String(error) });
   });
 }
 
 ipcMain.handle('check-for-updates', async () => {
-  if (!app.isPackaged || !updaterReady) {
-    return { ok: false, state: 'unavailable', message: 'Updates are available in the installed Windows app.' };
-  }
+  if (!app.isPackaged || !updaterReady) return { ok:false, state:'unavailable', message:'Updates are available in the installed Windows app.' };
   try {
     const result = await autoUpdater.checkForUpdates();
     const latest = result?.updateInfo?.version || app.getVersion();
     const current = app.getVersion();
-    if (latest === current) return { ok: true, state: 'current', version: current };
-    return { ok: true, state: 'downloading', version: latest };
+    return latest === current ? { ok:true, state:'current', version:current } : { ok:true, state:'downloading', version:latest };
   } catch (error) {
-    return { ok: false, state: 'error', message: error.message || String(error) };
+    return { ok:false, state:'error', message:error.message || String(error) };
   }
+});
+
+ipcMain.handle('install-update', async () => {
+  if (!app.isPackaged || !updaterReady || !updateDownloaded) return { ok:false };
+  setImmediate(() => autoUpdater.quitAndInstall(false, true));
+  return { ok:true };
 });
 
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
-  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
-    callback(permission === 'media');
-  });
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => callback(permission === 'media'));
   session.defaultSession.setPermissionCheckHandler((webContents, permission) => permission === 'media');
   createWindow();
   setupAutoUpdater();
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+  app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
+app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
