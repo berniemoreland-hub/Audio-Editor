@@ -1,0 +1,38 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "UUID": "com.berniemack.voxbernie",
+  "Name": "VOX-BERNIE",
+  "Description": "Direct Stream Deck control for the VOX-BERNIE radio recorder/editor.",
+  "Author": "Bernie Mack Productions",
+  "Version": "1.0.0.0",
+  "SDKVersion": 3,
+  "CodePath": "bin/plugin.js",
+  "Icon": "imgs/plugin-icon",
+  "Category": "VOX-BERNIE",
+  "CategoryIcon": "imgs/category-icon",
+  "Nodejs": { "Version": "20" },
+  "Software": { "MinimumVersion": "6.6" },
+  "OS": [
+    { "Platform": "windows", "MinimumVersion": "10" }
+  ],
+  "ApplicationsToMonitor": {
+    "windows": ["VOX-BERNIE.exe"]
+  },
+  "Actions": [
+    {"Name":"Record","UUID":"com.berniemack.voxbernie.record","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"RECORD","TitleAlignment":"middle"}]},
+    {"Name":"Stop","UUID":"com.berniemack.voxbernie.stop","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"STOP","TitleAlignment":"middle"}]},
+    {"Name":"Play / Pause","UUID":"com.berniemack.voxbernie.play","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"PLAY\nPAUSE","TitleAlignment":"middle"}]},
+    {"Name":"Slow Jog Left","UUID":"com.berniemack.voxbernie.jog-slow-left","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"SLOW\n◀","TitleAlignment":"middle"}]},
+    {"Name":"Slow Jog Right","UUID":"com.berniemack.voxbernie.jog-slow-right","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"SLOW\n▶","TitleAlignment":"middle"}]},
+    {"Name":"Fast Jog Left","UUID":"com.berniemack.voxbernie.jog-fast-left","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"FAST\n◀◀","TitleAlignment":"middle"}]},
+    {"Name":"Fast Jog Right","UUID":"com.berniemack.voxbernie.jog-fast-right","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"FAST\n▶▶","TitleAlignment":"middle"}]},
+    {"Name":"Cut","UUID":"com.berniemack.voxbernie.cut","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"CUT","TitleAlignment":"middle"}]},
+    {"Name":"Copy","UUID":"com.berniemack.voxbernie.copy","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"COPY","TitleAlignment":"middle"}]},
+    {"Name":"Paste","UUID":"com.berniemack.voxbernie.paste","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"PASTE","TitleAlignment":"middle"}]},
+    {"Name":"Delete","UUID":"com.berniemack.voxbernie.delete","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"DELETE","TitleAlignment":"middle"}]},
+    {"Name":"Undo","UUID":"com.berniemack.voxbernie.undo","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"UNDO","TitleAlignment":"middle"}]},
+    {"Name":"Save","UUID":"com.berniemack.voxbernie.save","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"SAVE","TitleAlignment":"middle"}]},
+    {"Name":"Save As","UUID":"com.berniemack.voxbernie.save-as","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"SAVE AS","TitleAlignment":"middle"}]},
+    {"Name":"Export WAV","UUID":"com.berniemack.voxbernie.export","Icon":"imgs/key","Controllers":["Keypad"],"States":[{"Image":"imgs/key","Title":"EXPORT","TitleAlignment":"middle"}]}
+  ]
+}
