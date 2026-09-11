@@ -1,0 +1,61 @@
+name: Build VOX-BERNIE Stream Deck Plugin
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'stream-deck-plugin/**'
+      - '.github/workflows/build-stream-deck-plugin.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-plugin:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install plugin dependencies
+        working-directory: stream-deck-plugin
+        run: npm install
+
+      - name: Build plugin
+        working-directory: stream-deck-plugin
+        run: npm run build
+
+      - name: Install Stream Deck CLI
+        run: npm install -g @elgato/cli@latest
+
+      - name: Validate plugin
+        working-directory: stream-deck-plugin
+        run: streamdeck validate com.berniemack.voxbernie.sdPlugin --no-update-check
+
+      - name: Package plugin
+        working-directory: stream-deck-plugin
+        run: streamdeck pack com.berniemack.voxbernie.sdPlugin --output dist --no-update-check
+
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VOX-BERNIE-Stream-Deck-Plugin
+          path: stream-deck-plugin/dist/*.streamDeckPlugin
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish plugin release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: streamdeck-v1.0.0
+          name: VOX-BERNIE Stream Deck Plugin v1.0.0
+          generate_release_notes: false
+          files: stream-deck-plugin/dist/*.streamDeckPlugin
