@@ -1,48 +1,21 @@
 {
   "name": "vox-bernie",
-  "version": "2.0.28",
+  "version": "2.0.29",
   "description": "Single-track VoxPro-style desktop waveform recorder and audio editor",
   "main": "main.js",
   "author": "Bernie Mack Productions",
   "license": "UNLICENSED",
-  "scripts": {
-    "start": "electron .",
-    "dist": "electron-builder --win nsis --publish never",
-    "dist:portable": "electron-builder --win portable"
-  },
-  "devDependencies": {
-    "electron": "44.3.0",
-    "electron-builder": "26.15.3"
-  },
-  "dependencies": {
-    "electron-updater": "6.6.2",
-    "lamejs": "1.2.1"
-  },
+  "scripts": {"start":"electron .","dist":"electron-builder --win nsis --publish never","dist:portable":"electron-builder --win portable"},
+  "devDependencies": {"electron":"44.3.0","electron-builder":"26.15.3"},
+  "dependencies": {"electron-updater":"6.6.2","lamejs":"1.2.1"},
   "build": {
-    "appId": "com.berniemack.waveeditor",
-    "productName": "VOX-BERNIE",
-    "asar": true,
-    "files": [
-      "main.js",
-      "preload-entry.js",
-      "preload.js",
-      "stereo-monitor.js",
-      "settings-ui-fix.js",
-      "update-ui-fix.js",
-      "waveform-resize.js",
-      "index.html",
-      "package.json"
-    ],
-    "publish": [{"provider":"github","owner":"berniemoreland-hub","repo":"Audio-Editor"}],
-    "win": {"target":["nsis"]},
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "VOX-BERNIE",
-      "artifactName": "VOX-BERNIE.Setup.${ext}"
-    }
+    "appId":"com.berniemack.waveeditor",
+    "productName":"VOX-BERNIE",
+    "asar":true,
+    "files":["main.js","preload-entry.js","preload.js","stereo-monitor.js","settings-ui-fix.js","update-ui-fix.js","waveform-resize.js","rename-menu.js","index.html","package.json"],
+    "publish":[{"provider":"github","owner":"berniemoreland-hub","repo":"Audio-Editor"}],
+    "win":{"target":["nsis"]},
+    "nsis":{"oneClick":false,"allowToChangeInstallationDirectory":true,"createDesktopShortcut":true,"createStartMenuShortcut":true,"shortcutName":"VOX-BERNIE","artifactName":"VOX-BERNIE.Setup.${ext}"}
   },
-  "buildNumber": "028"
+  "buildNumber":"029"
 }
