@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('desktopApp', {
   version,
   buildNumber,
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  installUpdate: () => ipcRenderer.invoke('install-update'),
   onUpdateStatus: callback => ipcRenderer.on('update-status', (_event, data) => callback(data))
 });
 
