@@ -22,6 +22,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let raf = 0;
   let historyL = [];
   let historyR = [];
+  let lastSampleAt = 0;
 
   function selectedInputConstraint() {
     try {
@@ -47,12 +48,24 @@ window.addEventListener('DOMContentLoaded', () => {
     live.height = Math.max(1, Math.floor(r.height * dpr));
   }
 
-  function drawLive() {
+  function drawLive(now = performance.now()) {
     if (!analyserL || !analyserR) return;
     const r = timeline.getBoundingClientRect();
     const w = Math.max(1, r.width), h = Math.max(1, r.height), half = h / 2;
     const dpr = window.devicePixelRatio || 1;
     if (live.width !== Math.floor(w * dpr) || live.height !== Math.floor(h * dpr)) sizeCanvas();
+
+    if (now - lastSampleAt >= 45) {
+      historyL.push(peak(analyserL));
+      historyR.push(peak(analyserR));
+      lastSampleAt = now;
+    }
+
+    const pointSpacing = 3;
+    const maxPoints = Math.max(20, Math.floor((w - 12) / pointSpacing));
+    if (historyL.length > maxPoints) historyL.splice(0, historyL.length - maxPoints);
+    if (historyR.length > maxPoints) historyR.splice(0, historyR.length - maxPoints);
+
     const g = live.getContext('2d');
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.clearRect(0, 0, w, h);
@@ -62,22 +75,18 @@ window.addEventListener('DOMContentLoaded', () => {
     g.fillStyle = '#93a097'; g.font = '11px Segoe UI';
     g.fillText('LEFT', 8, 14); g.fillText('RIGHT', 8, half + 14);
 
-    historyL.push(peak(analyserL)); historyR.push(peak(analyserR));
-    const maxPoints = Math.max(20, Math.floor(w / 2));
-    if (historyL.length > maxPoints) historyL.splice(0, historyL.length - maxPoints);
-    if (historyR.length > maxPoints) historyR.splice(0, historyR.length - maxPoints);
-
     function trace(values, centerY, laneHeight) {
       g.strokeStyle = '#49df86'; g.lineWidth = 1;
       g.beginPath();
-      const xStep = w / Math.max(1, maxPoints - 1);
       values.forEach((v, i) => {
-        const x = i * xStep;
+        const x = 8 + i * pointSpacing;
         const amp = Math.min(1, v) * laneHeight * .43;
-        g.moveTo(x, centerY - amp); g.lineTo(x, centerY + amp);
+        g.moveTo(x, centerY - amp);
+        g.lineTo(x, centerY + amp);
       });
       g.stroke();
     }
+
     trace(historyL, half / 2, half);
     trace(historyR, half + half / 2, half);
     raf = requestAnimationFrame(drawLive);
@@ -100,7 +109,9 @@ window.addEventListener('DOMContentLoaded', () => {
       source.connect(splitter);
       splitter.connect(analyserL, 0);
       try { splitter.connect(analyserR, 1); } catch { splitter.connect(analyserR, 0); }
-      historyL = []; historyR = [];
+      historyL = [];
+      historyR = [];
+      lastSampleAt = 0;
       wave.style.visibility = 'hidden';
       live.style.display = 'block';
       sizeCanvas();
