@@ -5,7 +5,7 @@
   "Description": "Direct Stream Deck control for the VOX-BERNIE radio recorder/editor.",
   "Author": "Bernie Mack Productions",
   "Version": "1.0.0.0",
-  "SDKVersion": 3,
+  "SDKVersion": 2,
   "CodePath": "bin/plugin.js",
   "Icon": "imgs/plugin-icon",
   "Category": "VOX-BERNIE",
