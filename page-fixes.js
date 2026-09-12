@@ -22,9 +22,9 @@
     }
 
     const desktop = window.desktopApp;
-    const version = desktop?.version || '2.0.30';
+    const version = desktop?.version || '2.0.33';
     const parts = String(version).split('.');
-    const build = desktop?.buildNumber || String(parseInt(parts[2] || '30', 10)).padStart(3, '0');
+    const build = desktop?.buildNumber || String(parseInt(parts[2] || '33', 10)).padStart(3, '0');
     $('voxBernieVersionLabel').textContent = `VERSION ${version} · BUILD ${build}`;
     if ($('buildLabel')) $('buildLabel').textContent = `VERSION ${version} · BUILD ${build}`;
     if ($('footer')) $('footer').textContent = `VOX-BERNIE · VERSION ${version} · BUILD ${build}`;
@@ -67,6 +67,60 @@
     });
   }
 
+  function ensureNameDialog() {
+    if ($('voxBernieNameDialog')) return;
+    const style = document.createElement('style');
+    style.id = 'voxBernieNameDialogStyle';
+    style.textContent = `
+      #voxBernieNameDialog{position:fixed;inset:0;z-index:2147483646;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.72)}
+      #voxBernieNameDialog.show{display:flex}
+      #voxBernieNameCard{width:min(460px,90vw);background:#101411;border:1px solid #344038;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.6);padding:16px}
+      #voxBernieNameTitle{font-weight:900;font-size:16px;margin-bottom:12px}
+      #voxBernieNameInput{width:100%;height:42px;border:1px solid #3a473e;border-radius:8px;background:#080b09;color:#fff;padding:0 11px;font-size:14px;outline:none}
+      #voxBernieNameInput:focus{border-color:#49df86;box-shadow:0 0 0 2px rgba(73,223,134,.15)}
+      #voxBernieNameActions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+      #voxBernieNameActions button{min-height:38px}
+    `;
+    document.head.appendChild(style);
+    const dialog = document.createElement('div');
+    dialog.id = 'voxBernieNameDialog';
+    dialog.innerHTML = `<div id="voxBernieNameCard"><div id="voxBernieNameTitle">Save As</div><input id="voxBernieNameInput" type="text" autocomplete="off" spellcheck="false"><div id="voxBernieNameActions"><button id="voxBernieNameCancel" type="button">CANCEL</button><button id="voxBernieNameConfirm" type="button" class="primary">SAVE</button></div></div>`;
+    document.body.appendChild(dialog);
+  }
+
+  function askForName(title, suggested, confirmLabel='SAVE') {
+    ensureNameDialog();
+    return new Promise(resolve => {
+      const dialog = $('voxBernieNameDialog');
+      const input = $('voxBernieNameInput');
+      const confirm = $('voxBernieNameConfirm');
+      const cancel = $('voxBernieNameCancel');
+      $('voxBernieNameTitle').textContent = title;
+      confirm.textContent = confirmLabel;
+      input.value = suggested || '';
+      dialog.classList.add('show');
+      setTimeout(() => { input.focus(); input.select(); }, 0);
+      let finished = false;
+      const finish = value => {
+        if (finished) return;
+        finished = true;
+        dialog.classList.remove('show');
+        input.removeEventListener('keydown', onKey);
+        confirm.onclick = null;
+        cancel.onclick = null;
+        resolve(value);
+      };
+      const onKey = e => {
+        if (e.key === 'Enter') { e.preventDefault(); finish(input.value.trim()); }
+        else if (e.key === 'Escape') { e.preventDefault(); finish(null); }
+      };
+      input.addEventListener('keydown', onKey);
+      confirm.onclick = () => finish(input.value.trim());
+      cancel.onclick = () => finish(null);
+      dialog.onclick = e => { if (e.target === dialog) finish(null); };
+    });
+  }
+
   function ensureFileMenu() {
     const menu = $('fileContextMenu');
     if (!menu) return;
@@ -79,60 +133,98 @@
       menu.insertBefore(rename, $('ctxDelete'));
     }
 
-    $('ctxSave').onclick = async () => {
+    const originalShowContextMenu = showContextMenu;
+    showContextMenu = function(x, y) {
+      menu.dataset.cutId = String(contextFileId || activeFileId || '');
+      return originalShowContextMenu(x, y);
+    };
+
+    const selectedCutId = () => {
+      const raw = menu.dataset.cutId;
+      if (raw !== undefined && raw !== '') {
+        const numeric = Number(raw);
+        return Number.isNaN(numeric) ? raw : numeric;
+      }
+      return contextFileId || activeFileId || null;
+    };
+
+    $('ctxSave').onclick = async e => {
+      e.preventDefault();
+      e.stopPropagation();
       hideContextMenu();
+      const id = selectedCutId();
       try {
-        const id = contextFileId || activeFileId;
-        if (!buffer || !id) return $('status').textContent = 'Select a recorded cut first.';
+        if (!buffer || !id) {
+          $('status').textContent = 'Select a recorded cut first.';
+          return;
+        }
+        $('status').textContent = 'Saving…';
         const cut = await getCut(id);
-        if (!cut) return $('status').textContent = 'Could not find that recorded cut.';
+        if (!cut) throw new Error('Selected cut could not be found.');
         cut.wav = wavBlob(buffer);
         cut.updatedAt = Date.now();
         cut.duration = buffer.duration;
         await putCut(cut);
         activeFileId = id;
+        contextFileId = null;
+        menu.dataset.cutId = '';
         $('filename').textContent = cut.name;
         $('activeFile').textContent = cut.name;
         $('status').textContent = 'Saved ' + cut.name + '.';
-        contextFileId = null;
         await renderShelf();
-      } catch (e) {
-        console.error(e);
-        $('status').textContent = 'SAVE FAILED: ' + (e.message || e);
+      } catch (err) {
+        console.error('VOX-BERNIE Save failed', err);
+        $('status').textContent = 'SAVE FAILED: ' + (err.message || err);
       }
     };
 
-    $('ctxSaveAs').onclick = async () => {
+    $('ctxSaveAs').onclick = async e => {
+      e.preventDefault();
+      e.stopPropagation();
       hideContextMenu();
       try {
-        if (!buffer) return $('status').textContent = 'Load or record audio first.';
-        const suggested = $('filename').textContent || await nextName();
-        const entered = prompt('Save As', suggested);
-        const name = entered?.trim();
+        if (!buffer) {
+          $('status').textContent = 'Load or record audio first.';
+          return;
+        }
+        const suggested = ($('filename').textContent || await nextName()).trim();
+        const name = await askForName('SAVE AS', suggested, 'SAVE AS');
         if (!name) return;
-        const id = await addCut({name, createdAt:Date.now(), updatedAt:Date.now(), duration:buffer.duration, wav:wavBlob(buffer)});
+        $('status').textContent = 'Saving new cut…';
+        const id = await addCut({
+          name,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          duration: buffer.duration,
+          wav: wavBlob(buffer)
+        });
         activeFileId = id;
         contextFileId = null;
+        menu.dataset.cutId = '';
         $('filename').textContent = name;
         $('activeFile').textContent = name;
         $('status').textContent = 'Saved as ' + name + '.';
         await renderShelf();
-      } catch (e) {
-        console.error(e);
-        $('status').textContent = 'SAVE AS FAILED: ' + (e.message || e);
+      } catch (err) {
+        console.error('VOX-BERNIE Save As failed', err);
+        $('status').textContent = 'SAVE AS FAILED: ' + (err.message || err);
       }
     };
 
-    rename.onclick = async () => {
+    rename.onclick = async e => {
+      e.preventDefault();
+      e.stopPropagation();
       hideContextMenu();
+      const id = selectedCutId();
       try {
-        const id = contextFileId || activeFileId;
-        if (!id) return $('status').textContent = 'Select a recorded cut first.';
+        if (!id) {
+          $('status').textContent = 'Select a recorded cut first.';
+          return;
+        }
         const cut = await getCut(id);
-        if (!cut) return $('status').textContent = 'Could not find that recorded cut.';
-        const entered = prompt('Rename', cut.name);
-        const name = entered?.trim();
-        if (!name || name === cut.name) { contextFileId = null; return; }
+        if (!cut) throw new Error('Selected cut could not be found.');
+        const name = await askForName('RENAME', cut.name, 'RENAME');
+        if (!name || name === cut.name) return;
         cut.name = name;
         cut.updatedAt = Date.now();
         await putCut(cut);
@@ -140,16 +232,18 @@
           $('filename').textContent = name;
           $('activeFile').textContent = name;
         }
-        $('status').textContent = 'Renamed to ' + name + '.';
         contextFileId = null;
+        menu.dataset.cutId = '';
+        $('status').textContent = 'Renamed to ' + name + '.';
         await renderShelf();
-      } catch (e) {
-        console.error(e);
-        $('status').textContent = 'RENAME FAILED: ' + (e.message || e);
+      } catch (err) {
+        console.error('VOX-BERNIE Rename failed', err);
+        $('status').textContent = 'RENAME FAILED: ' + (err.message || err);
       }
     };
   }
 
   ensureUpdateUI();
+  ensureNameDialog();
   ensureFileMenu();
 })();
