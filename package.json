@@ -1,6 +1,6 @@
 {
   "name": "vox-bernie",
-  "version": "2.0.32",
+  "version": "2.0.33",
   "description": "Single-track VoxPro-style desktop waveform recorder and audio editor",
   "main": "main.js",
   "author": "Bernie Mack Productions",
@@ -17,5 +17,5 @@
     "win":{"target":["nsis"]},
     "nsis":{"oneClick":false,"allowToChangeInstallationDirectory":true,"createDesktopShortcut":true,"createStartMenuShortcut":true,"shortcutName":"VOX-BERNIE","artifactName":"VOX-BERNIE.Setup.${ext}"}
   },
-  "buildNumber":"032"
+  "buildNumber":"033"
 }
